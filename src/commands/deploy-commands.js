@@ -7,8 +7,8 @@ const commands = [
   new SlashCommandBuilder()
     .setName('relatorio')
     .setDescription('Gera o quadro mensal (empresa + motoristas) sob demanda.')
-    .addIntegerOption((opt) => opt.setName('mes').setDescription('Mês (1-12). Padrão: mês anterior.').setMinValue(1).setMaxValue(12))
-    .addIntegerOption((opt) => opt.setName('ano').setDescription('Ano (ex: 2026). Padrão: mês anterior.').setMinValue(2016))
+    .addIntegerOption((opt) => opt.setName('mes').setDescription('Mês (1-12). Padrão: mês atual.').setMinValue(1).setMaxValue(12))
+    .addIntegerOption((opt) => opt.setName('ano').setDescription('Ano (ex: 2026). Padrão: mês atual.').setMinValue(2016))
     .toJSON(),
 ];
 

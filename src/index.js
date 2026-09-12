@@ -5,7 +5,7 @@ const config = require('./config');
 const VtlogApi = require('./vtlogApi');
 const { buildMonthlyReport } = require('./reportBuilder');
 const { buildMonthlyEmbed } = require('./embedBuilder');
-const { previousMonth } = require('./dateHelpers');
+const { previousMonth, currentMonth } = require('./dateHelpers');
 
 const api = new VtlogApi({ apiToken: config.vtlog.apiToken });
 
@@ -13,12 +13,18 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds],
 });
 
-/** Gera o relatório do período informado (ou do mês anterior, por padrão) e posta no canal configurado. */
+/**
+ * Gera o relatório do período informado e posta no canal configurado.
+ * Sem período informado, usa o MÊS ATUAL (mês em andamento) — é o que faz sentido
+ * pra uma postagem diária: o quadro vai "crescendo" ao longo do mês a cada dia.
+ * Pra fechar/consultar um mês passado específico, passe { year, month } explícitos
+ * (é o que o comando /relatorio faz quando você informa mes/ano).
+ */
 async function postMonthlyReport({ year, month, channelId: channelOverride } = {}) {
-  const fallback = previousMonth();
+  const fallback = currentMonth();
   const y = year ?? fallback.year;
   const m = month ?? fallback.month;
-  console.log(`[report] Gerando quadro mensal para ${m}/${y}...`);
+  console.log(`[report] Gerando quadro para ${m}/${y}...`);
   const report = await buildMonthlyReport(api, { year: y, month: m });
   const embed = buildMonthlyEmbed(report);
 
@@ -62,7 +68,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   try {
     const monthOpt = interaction.options.getInteger('mes');
     const yearOpt = interaction.options.getInteger('ano');
-    const { year, month } = monthOpt && yearOpt ? { year: yearOpt, month: monthOpt } : previousMonth();
+    const { year, month } = monthOpt && yearOpt ? { year: yearOpt, month: monthOpt } : currentMonth();
 
     const report = await buildMonthlyReport(api, { year, month });
     const embed = buildMonthlyEmbed(report);
@@ -75,4 +81,4 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 client.login(config.discord.token);
 
-module.exports = { postMonthlyReport, previousMonth };
+module.exports = { postMonthlyReport, previousMonth, currentMonth };

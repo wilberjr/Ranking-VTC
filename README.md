@@ -1,14 +1,17 @@
 # VTLog Discord Bot
 
-Bot que posta, automaticamente todo mês, um quadro com o desempenho da sua VTC no
-[VTLog](https://vtlog.net): lucro e posição da empresa no ranking global, e o ranking
-individual dos motoristas (pontuação + posição de cada um no ranking global do vtlog).
+Bot que posta, automaticamente todo dia, um quadro com o desempenho da sua VTC no
+[VTLog](https://vtlog.net) no **mês em andamento**: lucro e posição da empresa no ranking
+global, e o ranking individual dos motoristas (pontuação + posição de cada um no ranking
+global do vtlog). Como reporta sempre o mês atual, o quadro vai "crescendo" a cada postagem
+diária até fechar o mês.
 
 Validado com a VTC **8402 — Comunidade Eucatur** (board `Realistic`, sub-board `MapaRBR`, mapa `ets2rbr`).
 
 ## O que ele faz
 
-- Todo início de mês (configurável), busca os jobs da empresa no vtlog e calcula:
+- Todo dia (horário configurável), busca os jobs da empresa no vtlog **desde o início do
+  mês atual** e calcula:
   - **Empresa**: lucro do mês, km rodados, jobs entregues, motoristas ativos e a posição
     da empresa no ranking global do vtlog (`/v2/ranking/vtcs/{id}`).
   - **Motoristas**: ranking interno por lucro (ou km) no mês, calculado a partir dos jobs
@@ -86,7 +89,7 @@ npm start
 ```
 
 Isso conecta o bot ao Discord e agenda a postagem automática (`REPORT_CRON` no `.env`,
-padrão: dia 1 de cada mês às 09:00, fuso `America/Sao_Paulo`, reportando o mês anterior).
+padrão: todo dia às 09:00, fuso `America/Sao_Paulo`, sempre reportando o mês atual em andamento).
 
 ### Deixar rodando 24/7 num VPS
 
@@ -126,7 +129,11 @@ Tudo isso é configurável no `.env`, sem mexer no código:
 
 - `VTLOG_RANKING_TYPE`: `profit` (lucro, padrão) ou `distance` (km rodados).
 - `REPORT_TOP_N`: quantos motoristas aparecem no ranking individual (padrão 15).
-- `REPORT_CRON` / `VTLOG_TIMEZONE`: quando a postagem automática acontece.
+- `REPORT_CRON` / `VTLOG_TIMEZONE`: quando a postagem automática acontece. Exemplos:
+  - `0 9 * * *` → todo dia às 09:00 (padrão, ~24h de intervalo)
+  - `0 9,21 * * *` → duas vezes por dia, 09:00 e 21:00
+  - `0 */12 * * *` → a cada 12 horas
+  - `0 9 1 * *` → só no dia 1 de cada mês (volta ao comportamento "mensal")
 - `VTLOG_MAP`: mapa usado pra filtrar os jobs no ranking interno (padrão `ets2rbr`,
   o mesmo mapa da MapaRBR). Deixe `VTLOG_MAP=` vazio se não quiser filtrar por mapa.
 
@@ -144,7 +151,7 @@ src/
   vtlogApi.js             cliente HTTP pra api.vtlog.net (com fila/rate limit)
   reportBuilder.js         monta os dados do quadro mensal
   embedBuilder.js          monta o embed do Discord
-  dateHelpers.js           utilitário de datas (mês anterior)
+  dateHelpers.js           utilitário de datas (mês atual / mês anterior)
   index.js                 bot: login, agendamento (cron) e comando /relatorio
   testReport.js            roda o relatório no terminal, sem postar no Discord
   commands/deploy-commands.js  registra o slash command /relatorio

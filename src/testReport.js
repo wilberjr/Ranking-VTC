@@ -4,7 +4,7 @@
 const config = require('./config');
 const VtlogApi = require('./vtlogApi');
 const { buildMonthlyReport } = require('./reportBuilder');
-const { previousMonth } = require('./dateHelpers');
+const { currentMonth } = require('./dateHelpers');
 
 function parseArgs() {
   const args = Object.fromEntries(
@@ -19,7 +19,7 @@ function parseArgs() {
 (async () => {
   const api = new VtlogApi({ apiToken: config.vtlog.apiToken });
   const parsed = parseArgs();
-  const fallback = previousMonth();
+  const fallback = currentMonth();
   const year = parsed.year ?? fallback.year;
   const month = parsed.month ?? fallback.month;
 
